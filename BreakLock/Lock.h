@@ -20,9 +20,12 @@ public:
 	void setLock();
 	void setPHF();
 	void SplitString(const string& s, vector<string>& v, const string& c);
-	int* rePHF();
+	int rePHF();
 	void setHN();
-	void runCN();
+	void runCN(bool bounsCon);
+	void setLHF();
+	int reLHF();
+	int reUHF();
 
 
 
@@ -41,13 +44,18 @@ private:
 	vector<string> LINE;
 	vector<Locks> lock;
 	vector<int*> HN0, HN1, HN2, HN3, HN4;
+	vector<int*> validUHF;
+	vector<int*> CN0, CN1, CN2, CN3, CN4;
 	int UHF[10000][4];
-	int LHF[10000][4];
 	int ULHF[4];
+	int vVUHF[4];
 	int PHF[4];
-	int temp;
+	int LHF[4];
+	int hash[4];
+	int *vUHF;
+	int temp, sumboumns, passsum, totalsum, finalUHFv, finalPHFv, finalLHFv;
 	int *HN0temp, *HN1temp, *HN2temp, *HN3temp, *HN4temp, *safetemp;
 	bool safeCN;
-	int chkcounter = 0;   //for chk
+	int chkcounter = 0, chkcounter2 = 0;   //for chk
 };
 

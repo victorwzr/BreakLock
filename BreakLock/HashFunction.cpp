@@ -15,32 +15,43 @@ HashFunction::~HashFunction()
 
 void HashFunction::HashCN(int CN[], int CNkey[])
 {
+
 	CN[0] = CN[0] + CNkey[0];
+
 	if (CN[0] < 0)
 		CN[0] = CN[0] + 10;
 	if (CN[0] >= 10)
 		CN[0] = CN[0] - 10;
 	CN[1] = CN[1] + CNkey[1];
+
 	if (CN[1] < 0)
 		CN[1] = CN[1] + 10;
 	if (CN[1] >= 10)
 		CN[1] = CN[1] - 10;
 	CN[2] = CN[2] + CNkey[2];
+
 	if (CN[2] < 0)
 		CN[2] = CN[2] + 10;
 	if (CN[2] >= 10)
 		CN[2] = CN[2] - 10;
 	CN[3] = CN[3] + CNkey[3];
+
 	if (CN[3] < 0)
 		CN[3] =CN[3] + 10;
 	if (CN[3] >= 10)
 		CN[3] = CN[3] - 10;
 	TCN = CN;
+	sum = CN[0] + CN[1] + CN[2] + CN[3];
 }
 
 int * HashFunction::getCN()
 {
 	return TCN;
+}
+
+int HashFunction::getCNsum()
+{
+	return sum;
 }
 
 int* HashFunction::getHN()

@@ -14,7 +14,10 @@ int main()
 	l->setLock();
 	l->setPHF();
 	l->setHN();
-	l->runCN();
-    return 0;
+	l->runCN(true);
+	l->setLHF();
+	cout << l->rePHF() << "         " << l->reUHF() << "         " << l->reLHF() << endl;;
+	system("pause");
+	return 0;
 }
 

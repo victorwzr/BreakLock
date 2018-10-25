@@ -6,6 +6,7 @@
 #include "HashFunction.h"
 #include "safe.h"
 #include<fstream>
+#include<algorithm>
 
 HashFunction *hfun = new HashFunction();
 safe *sf = new safe();
@@ -52,43 +53,44 @@ void Lock::setLock()
 
 		}
 		else {
-			SplitString(culine, vec, " ");
-			if (vec[0] == "ROOT:") {
+			culine.erase(std::remove(culine.begin(), culine.end(), ' '), culine.end());
+			SplitString(culine, vec, ":");
+			if (vec[0] == "ROOT") {
 				s << vec[1];
 				s >> temp;
 				Root.push_back(temp);
 				s.clear();
 			}
 			else {
-				if (vec[0] == "LN0:") {
+				if (vec[0] == "LN0") {
 					s << vec[1];
 					s >> temp;
 					LN0.push_back(temp);
 					s.clear();
 				}
 				else {
-					if (vec[0] == "LN1:") {
+					if (vec[0] == "LN1") {
 						s << vec[1];
 						s >> temp;
 						LN1.push_back(temp);
 						s.clear();
 					}
 					else {
-						if (vec[0] == "LN2:") {
+						if (vec[0] == "LN2") {
 							s << vec[1];
 							s >> temp;
 							LN2.push_back(temp);
 							s.clear();
 						}
 						else {
-							if (vec[0] == "LN3:") {
+							if (vec[0] == "LN3") {
 								s << vec[1];
 								s >> temp;
 								LN3.push_back(temp);
 								s.clear();
 							}
 							else {
-								if (vec[0] == "LN4:") {
+								if (vec[0] == "LN4") {
 									s << vec[1];
 									s >> temp;
 									LN4.push_back(temp);
@@ -142,19 +144,28 @@ void Lock::setPHF()
 	PHF[1] = lock[0].B[1] - lock[0].A[1] - lock[0].A[1] + lock[0].index[1];
 	PHF[2] = lock[0].B[2] - lock[0].A[2] - lock[0].A[2] + lock[0].index[2];
 	PHF[3] = lock[0].B[3] - lock[0].A[3] - lock[0].A[3] + lock[0].index[3];
+
 	for (int i = 0; i < 4; i++) {
 		if (PHF[i] >= 10) {
 			PHF[i] = (PHF[i] - 10);
 		}
 		if (PHF[i] < 0)
 			PHF[i] = PHF[i] + 10;
-		cout << PHF[i] << endl;
+	}
+	for (int i = 0; i < 4; i++) {
+		if (PHF[i] >= 10) {
+			PHF[i] = (PHF[i] - 10);
+		}
+		if (PHF[i] < 0)
+			PHF[i] = PHF[i] + 10;
+		//cout << PHF[i] << endl;
 	}
 }
 
-int* Lock::rePHF()
+int Lock::rePHF()
 {
-	return PHF;
+	finalPHFv = PHF[0] * 1000 + PHF[1] * 100 + PHF[2] * 10 + PHF[3];
+	return finalPHFv;
 }
 
 void Lock::setHN()
@@ -172,38 +183,11 @@ void Lock::setHN()
 		hfun->HashHN(lock[i].E, PHF);
 		HN4.push_back(hfun->getHN());
 	}
-	/*for (int i = 0; i < HN0.size(); i++) {               //Output check
-		HN0temp = HN0.at(i);
-		HN1temp = HN1.at(i);
-		HN2temp = HN2.at(i); 
-		HN3temp = HN3.at(i);
-		HN4temp = HN4.at(i);
-		cout << "HN0 " << HN0temp[0] ;
-		cout << HN0temp[1] ;
-		cout << HN0temp[2] ;
-		cout << HN0temp[3] << endl;
-		cout << "HN1 " << HN1temp[0];
-		cout << HN1temp[1];
-		cout << HN1temp[2];
-		cout << HN1temp[3] << endl;
-		cout << "HN2 " << HN2temp[0];
-		cout << HN2temp[1];
-		cout << HN2temp[2];
-		cout << HN2temp[3] << endl;
-		cout << "HN3 " << HN3temp[0];
-		cout << HN3temp[1];
-		cout << HN3temp[2];
-		cout << HN3temp[3] << endl;
-		cout << "HN4 " << HN4temp[0];
-		cout << HN4temp[1];
-		cout << HN4temp[2];
-		cout << HN4temp[3] << endl;
-	}*/
 }
 
-void Lock::runCN()
+void Lock::runCN(bool bounsCon)
 {
-	ULHF[0] = lock[0].A[0] - lock[0].index[0] - PHF[0];
+	ULHF[0] = lock[0].A[0] - lock[0].index[0] - PHF[0];                     //set UHF + LHF
 	ULHF[1] = lock[0].A[1] - lock[0].index[1] - PHF[1];
 	ULHF[2] = lock[0].A[2] - lock[0].index[2] - PHF[2];
 	ULHF[3] = lock[0].A[3] - lock[0].index[3] - PHF[3];
@@ -213,76 +197,178 @@ void Lock::runCN()
 		}
 		if (ULHF[i] < 0)
 			ULHF[i] = ULHF[i] + 10;
-		cout << ULHF[i] << endl;
 	}
-	for (int i = 0; i < 10000; i++) {
+	for (int i = 0; i < 4; i++) {                       //fix the total to positive
+		if (ULHF[i] >= 10) {
+			ULHF[i] = (ULHF[i] - 10);
+		}
+		if (ULHF[i] < 0)
+			ULHF[i] = ULHF[i] + 10;
+		//	cout << ULHF[i] << endl;
+	}
+	for (int i = 0; i < 10000; i++) {                                  //inital UHF for 0-9999
 		UHF[i][0] = i / 1000;
 		UHF[i][1] = i / 100 - UHF[i][0] * 10;
 		UHF[i][2] = i / 10 - UHF[i][0] * 100 - UHF[i][1] * 10;
 		UHF[i][3] = i - UHF[i][0] * 1000 - UHF[i][1] * 100 - UHF[i][2] * 10;
 	}
-	
+
 	for (int i = 0; i < 10000; i++) {
 
 		for (int j = 0; j < 100; j++) {
-			hfun->HashCN(lock[j].index, UHF[i]);
+			hash[0] = lock[j].index[0];
+			hash[1] = lock[j].index[1];
+			hash[2] = lock[j].index[2];
+			hash[3] = lock[j].index[3];
+			hfun->HashCN(hash, UHF[i]);         //
 			safetemp = hfun->getCN();
-			if (i == 8244) {
-				cout << safetemp[0] << safetemp[1] << safetemp[2] << safetemp[3] << "chk-------------" << endl;
-			}
 			sf->chkCN(safetemp);
 			safeCN = sf->reCNSafe();
-			if (safeCN == false) {
+			if (safeCN == false)
 				break;
-			}
-			hfun->HashCN(HN0[j], UHF[i]);
+			hash[0] = HN0[j][0];
+			hash[1] = HN0[j][1];
+			hash[2] = HN0[j][2];
+			hash[3] = HN0[j][3];
+			hfun->HashCN(hash, UHF[i]);         //
 			safetemp = hfun->getCN();
-			if (i == 8244) {
-				cout << HN0[j][0] << HN0[j][1] << HN0[j][2] << HN0[j][3] << endl;
-				cout << safetemp[0] << safetemp[1] << safetemp[2] << safetemp[3] << "chk-------------" << endl;
-			}
 			sf->chkCN(safetemp);
 			safeCN = sf->reCNSafe();
-			if (safeCN == false) {
+			if (safeCN == false)
 				break;
-			}
-			hfun->HashCN(HN1[j], UHF[i]);
+			hash[0] = HN1[j][0];
+			hash[1] = HN1[j][1];
+			hash[2] = HN1[j][2];
+			hash[3] = HN1[j][3];
+			hfun->HashCN(hash, UHF[i]);         //
 			safetemp = hfun->getCN();
-			if (i == 8244) {
-				cout << safetemp[0] << safetemp[1] << safetemp[2] << safetemp[3] << "chk-------------" << endl;
-			}
 			sf->chkCN(safetemp);
 			safeCN = sf->reCNSafe();
-			if (safeCN == false) {
+			if (safeCN == false)
 				break;
-			}
-			hfun->HashCN(HN2[j], UHF[i]);
+			hash[0] = HN2[j][0];
+			hash[1] = HN2[j][1];
+			hash[2] = HN2[j][2];
+			hash[3] = HN2[j][3];
+			hfun->HashCN(hash, UHF[i]);         //
 			safetemp = hfun->getCN();
-			if (i == 8244) {
-				cout << safetemp[0] << safetemp[1] << safetemp[2] << safetemp[3] << "chk-------------" << endl;
-			}
 			sf->chkCN(safetemp);
 			safeCN = sf->reCNSafe();
-			if (safeCN == false) {
+			if (safeCN == false)
 				break;
-			}
-			hfun->HashCN(HN3[j], UHF[i]);
+			hash[0] = HN3[j][0];
+			hash[1] = HN3[j][1];
+			hash[2] = HN3[j][2];
+			hash[3] = HN3[j][3];
+			hfun->HashCN(hash, UHF[i]);         //
 			safetemp = hfun->getCN();
-			if (i == 8244) {
-				cout << safetemp[0] << safetemp[1] << safetemp[2] << safetemp[3] << "chk-------------" << endl;
-			}
 			sf->chkCN(safetemp);
 			safeCN = sf->reCNSafe();
-			if (safeCN == false) {
+			if (safeCN == false)
 				break;
+			if (j == 99) {
+				validUHF.push_back(UHF[i]);
 			}
-			if (j = 99) {
-				chkcounter++;
-				cout << UHF[i][0] << UHF[i][1] << UHF[i][2] << UHF[i][3] << "here!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
-				cout << chkcounter << endl;
+		}
+	}
+
+
+
+	if (bounsCon == true) {
+		for (auto m = 0; m < validUHF.size(); m++)
+		{
+			vUHF = validUHF.at(m);
+			for (int k = 0; k < 100; k++) {
+
+				hash[0] = lock[k].index[0];
+				hash[1] = lock[k].index[1];
+				hash[2] = lock[k].index[2];
+				hash[3] = lock[k].index[3];
+				hfun->HashCN(hash, vUHF);
+				sumboumns = hfun->getCNsum();
+				totalsum = totalsum + sumboumns;
+				passsum = sumboumns;
+				hash[0] = HN0[k][0];
+				hash[1] = HN0[k][1];
+				hash[2] = HN0[k][2];
+				hash[3] = HN0[k][3];
+				hfun->HashCN(hash, vUHF);
+				sumboumns = hfun->getCNsum();
+				totalsum = totalsum + sumboumns;
+				if (sumboumns <= passsum) {
+					break;
+				}
+				passsum = sumboumns;
+				hash[0] = HN1[k][0];
+				hash[1] = HN1[k][1];
+				hash[2] = HN1[k][2];
+				hash[3] = HN1[k][3];
+				hfun->HashCN(hash, vUHF);
+				sumboumns = hfun->getCNsum();
+				totalsum = totalsum + sumboumns;
+				if (sumboumns <= passsum) {
+					break;
+				}
+				passsum = sumboumns;
+				hash[0] = HN2[k][0];
+				hash[1] = HN2[k][1];
+				hash[2] = HN2[k][2];
+				hash[3] = HN2[k][3];
+				hfun->HashCN(hash, vUHF);
+				sumboumns = hfun->getCNsum();
+				totalsum = totalsum + sumboumns;
+				if (sumboumns <= passsum) {
+					break;
+				}
+				passsum = sumboumns;
+				hash[0] = HN3[k][0];
+				hash[1] = HN3[k][1];
+				hash[2] = HN3[k][2];
+				hash[3] = HN3[k][3];
+				hfun->HashCN(hash, vUHF);
+				sumboumns = hfun->getCNsum();
+				totalsum = totalsum + sumboumns;
+				if (sumboumns <= passsum) {
+					break;
+				}
+				if (totalsum % 2 == 1) {
+					break;
+				}
+
+				if (k == 99) {
+					vVUHF[0] = vUHF[0];
+					vVUHF[1] = vUHF[1];
+					vVUHF[2] = vUHF[2];
+					vVUHF[3] = vUHF[3];
+				}
 			}
 		}
 
-		//cout << UHF[i][0] << UHF[i][1] << UHF[i][2] << UHF[i][3] <<endl;
 	}
+}
+
+void Lock::setLHF()
+{
+	for (int i = 0; i < 4; i++) {
+		LHF[i] = ULHF[i] - vVUHF[i];
+		if (LHF[i] < 0) {
+			LHF[i] = LHF[i] + 10;
+		}
+		if (LHF[i] >= 10) {
+			LHF[i] = LHF[i] - 10;
+		}
+	}
+	finalLHFv = LHF[0] * 1000 + LHF[1] * 100 + LHF[2] * 10 + LHF[3];
+}
+
+int Lock::reLHF()
+{
+	return finalLHFv;
+}
+
+int Lock::reUHF()
+{
+	
+	finalUHFv = (vVUHF[0] * 1000) + (vVUHF[1] * 100) + (vVUHF[2] * 10) + (vVUHF[3]);
+	return finalUHFv;
 }
