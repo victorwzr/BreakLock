@@ -1,7 +1,7 @@
 # BreakLock
 cw2
-This is Break Lock Algothim for CSC8501 C++ programming.
-This part code is algorthim only.
-In finaly version of LockSafe include all code and test function.
+cw2 This is Brake Lock Algorithm for CSC8501 C++ programming.
+This part code is algorithm only.
+In final version of LockSafe include all code and test function.
 
 Zhaoran Wang
